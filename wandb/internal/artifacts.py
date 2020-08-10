@@ -7,14 +7,8 @@ import wandb.filesync.step_prepare
 
 
 def _manifest_json_from_proto(manifest):
-    return {
-        "version": manifest.version,
-        "storagePolicy": manifest.storage_policy,
-        "storagePolicyConfig": {
-            config.key: json.loads(config.value_json)
-            for config in manifest.storage_policy_config
-        },
-        "contents": {
+    if manifest.version == 1:
+        contents = {
             content.path: {
                 "digest": content.digest,
                 "ref": content.ref if content.ref else None,
@@ -25,7 +19,40 @@ def _manifest_json_from_proto(manifest):
                 },
             }
             for content in manifest.contents
+        }
+    elif manifest.version == 2:
+        names = {
+            content.path: content.digest for content in manifest.contents
+        }
+
+        entries = {
+            content.digest: {
+                "birthArtifactID": content.birth_artifact_id if content.birth_artifact_id else None,
+                "ref": content.ref if content.ref else None,
+                "size": content.size if content.size else None,
+                "local_path": content.local_path if content.local_path else None,
+                "extra": {
+                    extra.key: json.loads(extra.value_json) for extra in content.extra
+                },
+            }
+            for content in manifest.contents
+        }
+
+        contents = {
+            'names': names,
+            'entries': entries,
+        }
+    else:
+        raise Exception('unknown artifact manifest version: {}'.format(manifest.version))
+
+    return {
+        "version": manifest.version,
+        "storagePolicy": manifest.storage_policy,
+        "storagePolicyConfig": {
+            config.key: json.loads(config.value_json)
+            for config in manifest.storage_policy_config
         },
+        "contents": contents,
     }
 
 
@@ -66,7 +93,7 @@ class ArtifactSaver(object):
             )
 
         """Returns the server artifact."""
-        self._server_artifact = self._api.create_artifact(
+        self._server_artifact, latest = self._api.create_artifact(
             type,
             name,
             self._digest,
@@ -81,6 +108,7 @@ class ArtifactSaver(object):
         #   correct. It may be better to poll until it's committed or failed, and then decided what to
         #   do
         artifact_id = self._server_artifact["id"]
+        latest_artifact_id = latest["id"] if latest else None
         if (
             self._server_artifact["state"] == "COMMITTED"
             or self._server_artifact["state"] == "COMMITTING"
@@ -97,17 +125,8 @@ class ArtifactSaver(object):
                 'Unknown artifact state "{}"'.format(self._server_artifact["state"])
             )
 
-        # Upload Artifact "L0" files. This should only be wandb_manifest.json. We need to use
-        # the use_prepare_flow, so that the file entry is created in our database before the
-        # upload to cloud storage commences
-        with tempfile.NamedTemporaryFile("w+", suffix=".json", delete=False) as fp:
-            json.dump(self._manifest.to_manifest_json(), fp, indent=4)
-        self._file_pusher.file_changed(
-            save_name="wandb_manifest.json",
-            path=os.path.abspath(fp.name),
-            artifact_id=artifact_id,
-            use_prepare_flow=True,
-        )
+        self._api.create_artifact_manifest('wandb_manifest.json', "", artifact_id,
+                                           base_artifact_id=latest_artifact_id, include_upload=False)
 
         step_prepare = wandb.filesync.step_prepare.StepPrepare(
             self._api, 0.1, 0.01, 1000
@@ -123,11 +142,31 @@ class ArtifactSaver(object):
             ),
         )
 
+        def before_commit():
+            with tempfile.NamedTemporaryFile("w+", suffix=".json", delete=False) as fp:
+                path = os.path.abspath(fp.name)
+                json.dump(self._manifest.to_manifest_json(), fp, indent=4)
+            digest = wandb.util.md5_file(path)
+            # We're duplicating the file upload logic a little, which isn't great.
+            resp = self._api.create_artifact_manifest("wandb_manifest.json", digest, artifact_id,
+                                                      base_artifact_id=latest_artifact_id)
+            upload_url = resp['uploadUrl']
+            upload_headers = resp['uploadHeaders']
+            extra_headers = {}
+            for upload_header in upload_headers:
+                key, val = upload_header.split(':', 1)
+                extra_headers[key] = val
+            with open(path, 'rb') as fp:
+                self._api.upload_file_retry(
+                    upload_url,
+                    fp,
+                    extra_headers=extra_headers)
+
         def on_commit():
             if use_after_commit:
                 self._api.use_artifact(artifact_id)
             step_prepare.shutdown()
 
         # This will queue the commit. It will only happen after all the file uploads are done
-        self._file_pusher.commit_artifact(artifact_id, on_commit=on_commit)
+        self._file_pusher.commit_artifact(artifact_id, before_commit=before_commit, on_commit=on_commit)
         return self._server_artifact
