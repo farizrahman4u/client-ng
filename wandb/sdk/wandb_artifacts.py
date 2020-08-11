@@ -60,14 +60,23 @@ class Artifact(object):
             )
         # TODO: this shouldn't be a property of the artifact. It's a more like an
         # argument to log_artifact.
+        storage_layout = StorageLayout.V2
+        if env.get_use_v1_artifacts():
+            storage_layout = StorageLayout.V1
+
         self._storage_policy = WandbStoragePolicy(
-            config={"storageLayout": StorageLayout.V2,}
+            config={"storageLayout": storage_layout,}
         )
         self._api = InternalApi()
         self._final = False
         self._digest = None
         self._file_entries = None
-        self._manifest = ArtifactManifestV2(self, self._storage_policy)
+        if storage_layout == StorageLayout.V1:
+            self._manifest = ArtifactManifestV1(self, self._storage_policy)
+        elif storage_layout == StorageLayout.V2:
+            self._manifest = ArtifactManifestV2(self, self._storage_policy)
+        else:
+            raise ValueError('invalid')
         self._cache = get_artifacts_cache()
         self._added_new = False
         # You can write into this directory when creating artifact files

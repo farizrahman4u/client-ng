@@ -1533,11 +1533,12 @@ class Api(object):
     def create_artifact_files(self, artifact_files):
         mutation = gql('''
         mutation CreateArtifactFiles(
+            $storageLayout: ArtifactStorageLayout!
             $artifactFiles: [CreateArtifactFileSpecInput!]!
         ) {
             createArtifactFiles(input: {
                 artifactFiles: $artifactFiles,
-                storageLayout: V2
+                storageLayout: $storageLayout
             }) {
                 files {
                     edges {
@@ -1557,7 +1558,15 @@ class Api(object):
         }
         ''')
 
+        # TODO: we should use constants here from interface/artifacts.py
+        # but probably don't want the dependency. We're going to remove
+        # this setting in a future release, so I'm just hard-coding the strings.
+        storage_layout = 'V2'
+        if env.get_use_v1_artifacts():
+            storage_layout = 'V1'
+
         response = self.gql(mutation, variable_values={
+            'storageLayout': storage_layout,
             'artifactFiles': [af for af in artifact_files]
         })
 
