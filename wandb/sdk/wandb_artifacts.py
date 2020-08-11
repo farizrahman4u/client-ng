@@ -60,9 +60,9 @@ class Artifact(object):
             )
         # TODO: this shouldn't be a property of the artifact. It's a more like an
         # argument to log_artifact.
-        self._storage_policy = WandbStoragePolicy(config={
-            'storageLayout': StorageLayout.V2,
-        })
+        self._storage_policy = WandbStoragePolicy(
+            config={"storageLayout": StorageLayout.V2,}
+        )
         self._api = InternalApi()
         self._final = False
         self._digest = None
@@ -256,8 +256,8 @@ class ArtifactManifestV1(ArtifactManifest):
                 digest=val["digest"],
                 ref=val.get("ref"),
                 size=val.get("size"),
-                local_path=val.get("local_path"),
                 extra=val.get("extra"),
+                local_path=val.get("local_path"),
             )
             for name, val in manifest_json["contents"].items()
         }
@@ -288,7 +288,7 @@ class ArtifactManifestV1(ArtifactManifest):
                 json_entry["ref"] = entry.ref
             if entry.extra:
                 json_entry["extra"] = entry.extra
-            if entry.size:
+            if entry.size is not None:
                 json_entry["size"] = entry.size
             contents[entry.path] = json_entry
         return {
@@ -369,10 +369,7 @@ class ArtifactManifestV2(ArtifactManifest):
             "version": self.__class__.version(),
             "storagePolicy": self.storage_policy.name(),
             "storagePolicyConfig": self.storage_policy.config() or {},
-            "contents": {
-                "names": names,
-                "entries": entries,
-            }
+            "contents": {"names": names, "entries": entries,},
         }
 
     def digest(self):
@@ -384,7 +381,16 @@ class ArtifactManifestV2(ArtifactManifest):
 
 
 class ArtifactManifestEntry(object):
-    def __init__(self, path, ref, digest, birth_artifact_id=None, size=None, extra=None, local_path=None):
+    def __init__(
+        self,
+        path,
+        ref,
+        digest,
+        birth_artifact_id=None,
+        size=None,
+        extra=None,
+        local_path=None,
+    ):
         self.path = path
         self.ref = ref  # This is None for files stored in the artifact.
         self.digest = digest
@@ -482,7 +488,7 @@ class WandbStoragePolicy(StoragePolicy):
         elif storage_layout == StorageLayout.V2:
             return  # TODO
         else:
-            raise Exception('unrecognized storage layout: {}'.format(storage_layout))
+            raise Exception("unrecognized storage layout: {}".format(storage_layout))
 
     def store_file(self, artifact_id, entry, preparer, progress_callback=None):
         # write-through cache
@@ -661,16 +667,17 @@ class LocalFileHandler(StorageHandler):
         url = urlparse(manifest_entry.ref)
         local_path = "%s%s" % (url.netloc, url.path)
         if not os.path.exists(local_path):
-            raise ValueError("Failed to find file at path %s" % local_path)
+            raise ValueError("Local file reference: Failed to find file at path %s" % local_path)
 
         path, hit = self._cache.check_md5_obj_path(
-            manifest_entry.digest, manifest_entry.size)
+            manifest_entry.digest, manifest_entry.size
+        )
         if hit:
             return path
         md5 = md5_file_b64(local_path)
         if md5 != manifest_entry.digest:
             raise ValueError(
-                "Digest mismatch for path %s: expected %s but found %s"
+                "Local file reference: Digest mismatch for path %s: expected %s but found %s"
                 % (local_path, manifest_entry.digest, md5)
             )
 
@@ -770,7 +777,9 @@ class S3Handler(StorageHandler):
         return self._versioning_enabled
 
     def load_path(self, artifact, manifest_entry, local=False):
-        path, hit = self._cache.check_etag_obj_path(manifest_entry.digest, manifest_entry.size)
+        path, hit = self._cache.check_etag_obj_path(
+            manifest_entry.digest, manifest_entry.size
+        )
         if hit:
             return path
 
@@ -783,7 +792,6 @@ class S3Handler(StorageHandler):
             # We don't have version information so just get the latest version
             # and fallback to listing all versions if we don't have a match.
             obj = self._s3.Object(bucket, key)
-            md5 = self._md5_from_obj(obj)
             etag = self._etag_from_obj(obj)
             if etag != manifest_entry.digest:
                 if self.versioning_enabled(bucket):
@@ -890,8 +898,13 @@ class S3Handler(StorageHandler):
             relpath = os.path.relpath(obj.key, start=prefix)
             name = os.path.join(name, relpath)
             ref = os.path.join(path, relpath)
-        return ArtifactManifestEntry(name, ref,
-            self._etag_from_obj(obj), size=self._size_from_obj(obj), extra=self._extra_from_obj(obj))
+        return ArtifactManifestEntry(
+            name,
+            ref,
+            self._etag_from_obj(obj),
+            size=self._size_from_obj(obj),
+            extra=self._extra_from_obj(obj),
+        )
 
     @staticmethod
     def _etag_from_obj(obj):
@@ -920,7 +933,7 @@ class GCSHandler(StorageHandler):
         self._scheme = scheme or "gs"
         self._client = None
         self._versioning_enabled = None
-        self._cache = artifacts_cache.get_artifacts_cache()
+        self._cache = get_artifacts_cache()
 
     def versioning_enabled(self, bucket):
         if self._versioning_enabled is not None:
@@ -953,7 +966,8 @@ class GCSHandler(StorageHandler):
 
     def load_path(self, artifact, manifest_entry, local=False):
         path, hit = self._cache.check_md5_obj_path(
-            manifest_entry.digest, manifest_entry.size)
+            manifest_entry.digest, manifest_entry.size
+        )
         if hit:
             return path
 
