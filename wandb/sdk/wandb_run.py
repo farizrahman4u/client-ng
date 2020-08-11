@@ -887,7 +887,9 @@ class RunManaged(Run):
             artifact = artifact_or_name
             if type is not None:
                 raise ValueError("cannot specify type when passing Artifact object")
-            if isinstance(aliases, str):
+            if aliases is None:
+                aliases = []
+            elif isinstance(aliases, str):
                 aliases = [aliases]
             if isinstance(artifact_or_name, wandb.Artifact):
                 artifact.finalize()
