@@ -869,8 +869,6 @@ class RunManaged(Run):
 
         if isinstance(artifact_or_name, str):
             name = artifact_or_name
-            if type is None:
-                raise ValueError("type required")
             public_api = public.Api(
                 {"entity": r.entity, "project": r.project, "run": self.id}
             )
@@ -885,8 +883,6 @@ class RunManaged(Run):
             return artifact
         else:
             artifact = artifact_or_name
-            if type is not None:
-                raise ValueError("cannot specify type when passing Artifact object")
             if aliases is None:
                 aliases = []
             elif isinstance(aliases, str):
