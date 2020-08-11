@@ -336,22 +336,27 @@ def _monkey_keras(keras):
     models = getattr(keras, 'engine', None)
     if not models:
         return
+    models.Model._keras_or_tfkeras = keras
+    if models.Model.fit == _magic_fit:
+        return
     models.Model._fit = models.Model.fit
     models.Model.fit = _magic_fit
     models.Model._fit_generator = models.Model.fit_generator
     models.Model.fit_generator = _magic_fit_generator
-    models.Model._keras_or_tfkeras = keras
 
 
 def _monkey_tfkeras(tfkeras):
     models = getattr(tfkeras, 'models', None)
     if not models:
         return
+    models.Model._keras_or_tfkeras = tfkeras
+    if models.Model.fit == _magic_fit:
+        return
     models.Model._fit = models.Model.fit
     models.Model.fit = _magic_fit
     models.Model._fit_generator = models.Model.fit_generator
     models.Model.fit_generator = _magic_fit_generator
-    models.Model._keras_or_tfkeras = tfkeras
+
 
 
 def _monkey_absl(absl_app):
