@@ -94,6 +94,9 @@ class Config(object):
         if self._callback:
             self._callback(key=key, val=val, data=self._as_dict())
 
+    def items(self):
+        return self._items.items()
+
     __setattr__ = __setitem__
 
     def __getattr__(self, key):

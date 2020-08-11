@@ -19,6 +19,7 @@ from wandb.lib import console as lib_console
 from wandb.lib import filesystem, module, reporting
 from wandb.old import io_wrap
 from wandb.util import sentry_exc
+from wandb import trigger
 
 from .wandb_config import parse_config
 from .wandb_run import Run, RunDummy, RunManaged
@@ -257,6 +258,7 @@ class _WandbInit(object):
         self._wl._early_logger_flush(logger)
 
     def init(self):
+        trigger.call("on_init", **locals())
         s = self.settings
         config = self.config
 
