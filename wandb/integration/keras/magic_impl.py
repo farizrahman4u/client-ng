@@ -336,7 +336,7 @@ def _monkey_keras(keras):
     models = getattr(keras, 'engine', None)
     if not models:
         return
-    models.Model._keras_or_tfkeras = 'keras'
+    models.Model._keras_or_tfkeras = keras
     if models.Model.fit == _magic_fit:
         return
     models.Model._fit = models.Model.fit
@@ -349,7 +349,7 @@ def _monkey_tfkeras(tfkeras):
     models = getattr(tfkeras, 'models', None)
     if not models:
         return
-    models.Model._keras_or_tfkeras = 'tfkeras'
+    models.Model._keras_or_tfkeras = tfkeras
     if models.Model.fit == _magic_fit:
         return
     models.Model._fit = models.Model.fit

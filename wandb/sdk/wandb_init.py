@@ -258,7 +258,7 @@ class _WandbInit(object):
         self._wl._early_logger_flush(logger)
 
     def init(self):
-        trigger.call("on_init", self.config)
+        trigger.call("on_init", **self.config)
         s = self.settings
         config = self.config
 
