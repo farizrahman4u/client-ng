@@ -13,6 +13,7 @@ import time
 
 from six import raise_from, reraise
 import wandb
+from wandb import trigger
 from wandb.backend.backend import Backend
 from wandb.errors.error import UsageError
 from wandb.lib import console as lib_console
@@ -257,6 +258,7 @@ class _WandbInit(object):
         self._wl._early_logger_flush(logger)
 
     def init(self):
+        trigger.call("on_init", **self.config)
         s = self.settings
         config = self.config
 
