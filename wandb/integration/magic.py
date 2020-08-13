@@ -12,6 +12,7 @@ import re
 
 import wandb
 from wandb import trigger
+from wandb.util import add_import_hook
 
 
 _import_hook = None
@@ -21,56 +22,6 @@ _args_system = None
 _args_absl = None
 _magic_init_seen = False
 _magic_config = {}
-
-
-# PEP302 new import hooks, in python3 we could use importlib
-class ImportMetaHook():
-    def __init__(self, watch=(), on_import=None):
-        self.modules = {}
-        self.watch_full = frozenset(())
-        self.watch_last = frozenset(())
-        self.on_import_full = {}
-        self.on_import_last = {}
-
-    def add(self, fullname=None, lastname=None, on_import=None):
-        if fullname:
-            self.on_import_full[fullname] = on_import
-            self.watch_full = frozenset(tuple(self.on_import_full.keys()))
-        if lastname:
-            self.on_import_last[lastname] = on_import
-            self.watch_last = frozenset(tuple(self.on_import_last.keys()))
-
-    def install(self):
-        sys.meta_path.insert(0, self)
-
-    def uninstall(self):
-        sys.meta_path.remove(self)
-
-    def find_module(self, fullname, path=None):
-        if fullname in self.watch_full:
-            return self
-        lastname = fullname.split('.')[-1]
-        if lastname in self.watch_last:
-            return self
-
-    def load_module(self, fullname):
-        self.uninstall()
-        mod = importlib.import_module(fullname)
-        self.install()
-        self.modules[fullname] = mod
-        on_import = self.on_import_full.get(fullname)
-        if not on_import:
-            lastname = fullname.split('.')[-1]
-            on_import = self.on_import_last.get(lastname)
-        if on_import:
-            on_import(fullname)
-        return mod
-
-    def get_modules(self):
-        return tuple(self.modules)
-
-    def get_module(self, module):
-        return self.modules[module]
 
 
 class ArgumentException(Exception):
@@ -332,7 +283,8 @@ def _magic_fit_generator(self, generator,
     return _fit_wrapper(self, self._fit_generator, generator=generator, steps_per_epoch=steps_per_epoch, epochs=epochs, *args, **kwargs)
 
 
-def _monkey_keras(keras):
+def _monkey_keras():
+    import keras
     models = getattr(keras, 'engine', None)
     if not models:
         return
@@ -345,7 +297,8 @@ def _monkey_keras(keras):
     models.Model.fit_generator = _magic_fit_generator
 
 
-def _monkey_tfkeras(tfkeras):
+def _monkey_tfkeras():
+    from tensorflow import keras as tfkeras
     models = getattr(tfkeras, 'models', None)
     if not models:
         return
@@ -359,7 +312,8 @@ def _monkey_tfkeras(tfkeras):
 
 
 
-def _monkey_absl(absl_app):
+def _monkey_absl():
+    from absl import app as absl_app
     def _absl_callback():
         absl_flags = sys.modules.get('absl.flags')
         if not absl_flags:
@@ -390,17 +344,15 @@ def _monkey_absl(absl_app):
 
 def _on_import_keras(fullname):
     if fullname == 'keras':
-        keras = _import_hook.get_module('keras')
-        _monkey_keras(keras)
+        _monkey_keras()
     if fullname == 'tensorflow.python.keras':
-        keras = _import_hook.get_module('tensorflow.python.keras')
-        _monkey_tfkeras(keras)
+        _monkey_tfkeras()
 
 
 def _on_import_absl(fullname):
     if fullname == 'absl.app':
-        keras = _import_hook.get_module('absl.app')
-        _monkey_absl(keras)
+        absl = _import_hook.get_module('absl.app')
+        _monkey_absl()
 
 
 def _process_system_args():
@@ -499,7 +451,7 @@ def magic_install(init_args=None):
 
     global _magic_config
     global _import_hook
-
+    from wandb.integration.keras import WandbCallback # add keras import hooks first
     # parse config early, before we have wandb.config overrides
     _magic_config, magic_set = _parse_magic(wandb.env.get_magic())
 
@@ -549,22 +501,16 @@ def magic_install(init_args=None):
 
     # Monkey patch both tf.keras and keras
     if 'tensorflow.python.keras' in sys.modules:
-        _monkey_tfkeras(sys.modules.get('tensorflow.python.keras'))
+        _monkey_tfkeras()
     if 'keras' in sys.modules:
-        _monkey_keras(sys.modules.get('keras'))
+        _monkey_keras()
     # Always setup import hooks looking for keras or tf.keras
-    if not _import_hook:
-        _import_hook = ImportMetaHook()
-        _import_hook.install()
-    _import_hook.add(lastname='keras', on_import=_on_import_keras)
+    add_import_hook(lastname='keras', on_import=_on_import_keras)
 
     if 'absl.app' in sys.modules:
-        _monkey_absl(sys.modules.get('absl.app'))
+        _monkey_absl()
     else:
-        if not _import_hook:
-            _import_hook = ImportMetaHook()
-            _import_hook.install()
-        _import_hook.add(fullname='absl.app', on_import=_on_import_absl)
+        add_import_hook(fullname='absl.app', on_import=_on_import_absl)
 
     # update wandb.config on fit or program finish
     trigger.register('on_fit', _magic_update_config)

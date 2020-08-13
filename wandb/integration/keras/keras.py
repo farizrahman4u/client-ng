@@ -16,23 +16,7 @@ import wandb
 import sys
 from importlib import import_module
 from itertools import chain
-
-# Use system keras if it's been imported
-if "keras" in sys.modules:
-    import keras
-    import keras.backend as K
-elif "tensorflow.python.keras" in sys.modules:
-    import tensorflow.keras as keras
-    import tensorflow.keras.backend as K
-else:
-    try:
-        wandb.termwarn(
-            "import wandb.keras called before import keras or import tensorflow.keras.  This can lead to a version mismatch, W&B now assumes tensorflow.keras")
-        import tensorflow.keras as keras
-        import tensorflow.keras.backend as K
-    except ImportError:
-        import keras
-        import keras.backend as K
+from wandb.util import add_import_hook
 
 
 def is_dataset(data):
@@ -64,6 +48,18 @@ def is_generator_like(data):
         data, types))
 
 
+def on_import_keras(fullname):
+    print('---on_import_keras---')
+    if fullname == 'keras':
+        patch_keras()
+    elif fullname == 'tensorflow.python.keras':
+        patch_tf_keras()
+
+
+def patch_keras():
+    # TODO
+    pass
+
 def patch_tf_keras():
     import tensorflow as tf
     from tensorflow.python.eager import context
@@ -85,6 +81,7 @@ def patch_tf_keras():
     old_generator = training_generator.fit_generator
 
     def set_wandb_attrs(cbk, val_data):
+        print('----setattrs----')
         if isinstance(cbk, WandbCallback):
             if is_generator_like(val_data):
                 cbk.generator = val_data
@@ -147,12 +144,36 @@ def patch_tf_keras():
         wandb.patched["keras"].append(
             ["tensorflow.python.keras.engine.training.Model", "fit"])
 
-if "tensorflow" in wandb.util.get_full_typename(keras):
+
+add_import_hook(lastname="keras", on_import=on_import_keras)
+
+
+# # Use system keras if it's been imported
+if "keras" in sys.modules:
+    patch_keras()
+    import keras
+    import keras.backend as K
+elif "tensorflow.python.keras" in sys.modules:
+    patch_tf_keras()
+    import tensorflow.keras as keras
+    import tensorflow.keras.backend as K
+else:
     try:
-        patch_tf_keras()
-    except Exception:
         wandb.termwarn(
-            "Unable to patch tensorflow.keras for use with W&B.  You will not be able to log images unless you set the generator argument of the callback.")
+            "import wandb.keras called before import keras or import tensorflow.keras.  This can lead to a version mismatch, W&B now assumes tensorflow.keras")
+        import tensorflow.keras as keras
+        import tensorflow.keras.backend as K
+    except ImportError:
+        import keras
+        import keras.backend as K
+
+
+# if "tensorflow" in wandb.util.get_full_typename(keras):
+#     try:
+#         patch_tf_keras()
+#     except Exception:
+#         wandb.termwarn(
+#             "Unable to patch tensorflow.keras for use with W&B.  You will not be able to log images unless you set the generator argument of the callback.")
 
 
 class WandbCallback(keras.callbacks.Callback):

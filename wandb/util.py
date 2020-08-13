@@ -955,3 +955,57 @@ def to_native_slash_path(path):
 def bytes_to_hex(bytestr):
     # Works in python2 / python3
     return codecs.getencoder('hex')(bytestr)[0].decode('ascii')
+
+
+class ImportMetaHook():
+    def __init__(self):
+        self.modules = {}
+        self.on_import_full = {}
+        self.on_import_last = {}
+
+    def add(self, fullname=None, lastname=None, on_import=None):
+        if fullname:
+            self.on_import_full[fullname] = on_import
+        if lastname:
+            self.on_import_last[lastname] = on_import
+
+    def install(self):
+        sys.meta_path.insert(0, self)
+
+    def uninstall(self):
+        sys.meta_path.remove(self)
+
+    def find_module(self, fullname, path=None):
+        if fullname in self.on_import_full:
+            return self
+        lastname = fullname.split('.')[-1]
+        if lastname in self.on_import_last:
+            return self
+
+    def load_module(self, fullname):
+        self.uninstall()
+        mod = importlib.import_module(fullname)
+        self.install()
+        self.modules[fullname] = mod
+        on_import = self.on_import_full.get(fullname)
+        if not on_import:
+            lastname = fullname.split('.')[-1]
+            on_import = self.on_import_last.get(lastname)
+        if on_import:
+            on_import(fullname)
+        return mod
+
+    def get_modules(self):
+        return tuple(self.modules)
+
+    def get_module(self, module):
+        return self.modules[module]
+
+_import_hook = None
+
+def add_import_hook(fullname=None, lastname=None, on_import=None):
+    global _import_hook
+    if _import_hook is None:
+        _import_hook = ImportMetaHook()
+        _import_hook.install()
+    _import_hook.add(fullname, lastname, on_import)
