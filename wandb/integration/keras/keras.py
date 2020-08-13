@@ -155,14 +155,6 @@ else:
         import keras.backend as K
 
 
-# if "tensorflow" in wandb.util.get_full_typename(keras):
-#     try:
-#         patch_tf_keras()
-#     except Exception:
-#         wandb.termwarn(
-#             "Unable to patch tensorflow.keras for use with W&B.  You will not be able to log images unless you set the generator argument of the callback.")
-
-
 class WandbCallback(keras.callbacks.Callback):
     """WandbCallback automatically integrates keras with wandb.
 
