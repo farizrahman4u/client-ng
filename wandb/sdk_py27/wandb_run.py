@@ -41,7 +41,7 @@ if wandb.TYPE_CHECKING:  # type: ignore
 
 
 logger = logging.getLogger("wandb")
-EXIT_TIMEOUT = 60
+EXIT_TIMEOUT = 10000000000
 
 
 class Run(object):
