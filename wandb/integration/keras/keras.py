@@ -16,7 +16,6 @@ import wandb
 import sys
 from importlib import import_module
 from itertools import chain
-from wandb.util import add_import_hook
 
 
 def is_dataset(data):
@@ -48,14 +47,6 @@ def is_generator_like(data):
         data, types))
 
 
-def on_import_keras(fullname):
-    print('---on_import_keras---')
-    if fullname == 'keras':
-        patch_keras()
-    elif fullname == 'tensorflow.python.keras':
-        patch_tf_keras()
-
-
 def patch_keras():
     # TODO
     pass
@@ -81,7 +72,6 @@ def patch_tf_keras():
     old_generator = training_generator.fit_generator
 
     def set_wandb_attrs(cbk, val_data):
-        print('----setattrs----')
         if isinstance(cbk, WandbCallback):
             if is_generator_like(val_data):
                 cbk.generator = val_data
@@ -143,9 +133,6 @@ def patch_tf_keras():
         training.Model.fit = new_v2
         wandb.patched["keras"].append(
             ["tensorflow.python.keras.engine.training.Model", "fit"])
-
-
-add_import_hook(lastname="keras", on_import=on_import_keras)
 
 
 # # Use system keras if it's been imported
