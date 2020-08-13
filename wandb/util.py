@@ -960,14 +960,10 @@ def bytes_to_hex(bytestr):
 class ImportMetaHook():
     def __init__(self):
         self.modules = {}
-        self.on_import_full = {}
-        self.on_import_last = {}
+        self.on_import = {}
 
-    def add(self, fullname=None, lastname=None, on_import=None):
-        if fullname:
-            self.on_import_full[fullname] = on_import
-        if lastname:
-            self.on_import_last[lastname] = on_import
+    def add(self, fullname, on_import):
+        self.on_import.setdefault(fullname, []).append(on_import)
 
     def install(self):
         sys.meta_path.insert(0, self)
@@ -976,10 +972,7 @@ class ImportMetaHook():
         sys.meta_path.remove(self)
 
     def find_module(self, fullname, path=None):
-        if fullname in self.on_import_full:
-            return self
-        lastname = fullname.split('.')[-1]
-        if lastname in self.on_import_last:
+        if fullname in self.on_import:
             return self
 
     def load_module(self, fullname):
@@ -987,12 +980,9 @@ class ImportMetaHook():
         mod = importlib.import_module(fullname)
         self.install()
         self.modules[fullname] = mod
-        on_import = self.on_import_full.get(fullname)
-        if not on_import:
-            lastname = fullname.split('.')[-1]
-            on_import = self.on_import_last.get(lastname)
+        on_import = self.on_import.get(fullname)
         if on_import:
-            on_import(fullname)
+            on_import()
         return mod
 
     def get_modules(self):
@@ -1003,9 +993,9 @@ class ImportMetaHook():
 
 _import_hook = None
 
-def add_import_hook(fullname=None, lastname=None, on_import=None):
+def add_import_hook(fullname, on_import):
     global _import_hook
     if _import_hook is None:
         _import_hook = ImportMetaHook()
         _import_hook.install()
-    _import_hook.add(fullname, lastname, on_import)
+    _import_hook.add(fullname, on_import)

@@ -342,19 +342,6 @@ def _monkey_absl():
     call_after_init(_absl_callback)
 
 
-def _on_import_keras(fullname):
-    if fullname == 'keras':
-        _monkey_keras()
-    if fullname == 'tensorflow.python.keras':
-        _monkey_tfkeras()
-
-
-def _on_import_absl(fullname):
-    if fullname == 'absl.app':
-        absl = _import_hook.get_module('absl.app')
-        _monkey_absl()
-
-
 def _process_system_args():
     global _args_system
     # try using argparse
@@ -505,12 +492,13 @@ def magic_install(init_args=None):
     if 'keras' in sys.modules:
         _monkey_keras()
     # Always setup import hooks looking for keras or tf.keras
-    add_import_hook(lastname='keras', on_import=_on_import_keras)
+    add_import_hook(fullname='keras', on_import=_monkey_keras)
+    add_import_hook(fullname='tensorflow.python.keras', on_import=_monkey_tfkeras)
 
     if 'absl.app' in sys.modules:
         _monkey_absl()
     else:
-        add_import_hook(fullname='absl.app', on_import=_on_import_absl)
+        add_import_hook(fullname='absl.app', on_import=_monkey_absl)
 
     # update wandb.config on fit or program finish
     trigger.register('on_fit', _magic_update_config)
