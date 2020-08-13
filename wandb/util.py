@@ -980,9 +980,10 @@ class ImportMetaHook():
         mod = importlib.import_module(fullname)
         self.install()
         self.modules[fullname] = mod
-        on_import = self.on_import.get(fullname)
-        if on_import:
-            on_import()
+        on_imports = self.on_import.get(fullname)
+        if on_imports:
+            for f in on_imports:
+                f()
         return mod
 
     def get_modules(self):
