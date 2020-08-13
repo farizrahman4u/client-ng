@@ -150,9 +150,11 @@ else:
             "import wandb.keras called before import keras or import tensorflow.keras.  This can lead to a version mismatch, W&B now assumes tensorflow.keras")
         import tensorflow.keras as keras
         import tensorflow.keras.backend as K
+        patch_tf_keras()
     except ImportError:
         import keras
         import keras.backend as K
+        patch_keras()
 
 
 class WandbCallback(keras.callbacks.Callback):
