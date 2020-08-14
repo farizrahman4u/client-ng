@@ -47,10 +47,6 @@ def is_generator_like(data):
         data, types))
 
 
-def patch_keras():
-    # TODO
-    pass
-
 def patch_tf_keras():
     import tensorflow as tf
     from tensorflow.python.eager import context
@@ -135,26 +131,9 @@ def patch_tf_keras():
             ["tensorflow.python.keras.engine.training.Model", "fit"])
 
 
-# # Use system keras if it's been imported
-if "keras" in sys.modules:
-    patch_keras()
-    import keras
-    import keras.backend as K
-elif "tensorflow.python.keras" in sys.modules:
-    patch_tf_keras()
-    import tensorflow.keras as keras
-    import tensorflow.keras.backend as K
-else:
-    try:
-        wandb.termwarn(
-            "import wandb.keras called before import keras or import tensorflow.keras.  This can lead to a version mismatch, W&B now assumes tensorflow.keras")
-        import tensorflow.keras as keras
-        import tensorflow.keras.backend as K
-        patch_tf_keras()
-    except ImportError:
-        import keras
-        import keras.backend as K
-        patch_keras()
+import tensorflow.keras as keras
+import tensorflow.keras.backend as K
+patch_tf_keras()
 
 
 class WandbCallback(keras.callbacks.Callback):

@@ -283,20 +283,6 @@ def _magic_fit_generator(self, generator,
     return _fit_wrapper(self, self._fit_generator, generator=generator, steps_per_epoch=steps_per_epoch, epochs=epochs, *args, **kwargs)
 
 
-def _monkey_keras():
-    import keras
-    models = getattr(keras, 'engine', None)
-    if not models:
-        return
-    models.Model._keras_or_tfkeras = keras
-    if models.Model.fit == _magic_fit:
-        return
-    models.Model._fit = models.Model.fit
-    models.Model.fit = _magic_fit
-    models.Model._fit_generator = models.Model.fit_generator
-    models.Model.fit_generator = _magic_fit_generator
-
-
 def _monkey_tfkeras():
     from tensorflow import keras as tfkeras
     models = getattr(tfkeras, 'models', None)
@@ -486,13 +472,12 @@ def magic_install(init_args=None):
         wandb.config['magic'] = magic_set
         wandb.config.persist()
 
-    # Monkey patch both tf.keras and keras
-    if 'tensorflow.python.keras' in sys.modules:
+    # Monkey patch tf.keras
+    if 'tensorflow.python.keras' in sys.modules or 'keras' in sys.modules:
         _monkey_tfkeras()
-    if 'keras' in sys.modules:
-        _monkey_keras()
+
     # Always setup import hooks looking for keras or tf.keras
-    add_import_hook(fullname='keras', on_import=_monkey_keras)
+    add_import_hook(fullname='keras', on_import=_monkey_tfkeras)
     add_import_hook(fullname='tensorflow.python.keras', on_import=_monkey_tfkeras)
 
     if 'absl.app' in sys.modules:
