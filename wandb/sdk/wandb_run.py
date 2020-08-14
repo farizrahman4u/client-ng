@@ -31,6 +31,7 @@ from wandb.lib.dict import dict_from_proto_list
 from wandb.lib.filenames import JOBSPEC_FNAME
 from wandb.util import sentry_set_scope, to_forward_slash_path
 from wandb.viz import Visualize
+from wandb import trigger
 
 from . import wandb_config
 from . import wandb_history
@@ -800,6 +801,8 @@ class RunManaged(Run):
         self._console_start()
 
     def _on_finish(self):
+        trigger.call('on_finished')
+
         # make sure all uncommitted history is flushed
         self.history._flush()
 
