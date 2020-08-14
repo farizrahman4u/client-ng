@@ -25,6 +25,7 @@ from six import iteritems, string_types
 from six.moves import _thread as thread
 from six.moves.urllib.parse import quote as url_quote
 import wandb
+from wandb import trigger
 from wandb.apis import internal, public
 from wandb.data_types import _datatypes_set_callback
 from wandb.errors import Error
@@ -34,7 +35,6 @@ from wandb.lib.dict import dict_from_proto_list
 from wandb.lib.filenames import JOBSPEC_FNAME
 from wandb.util import sentry_set_scope, to_forward_slash_path
 from wandb.viz import Visualize
-from wandb import trigger
 
 from . import wandb_config
 from . import wandb_history
