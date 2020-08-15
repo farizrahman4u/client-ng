@@ -14,6 +14,7 @@ import time
 from six import raise_from, reraise
 import wandb
 from wandb import trigger
+from wandb.integration.magic import magic_install
 from wandb.backend.backend import Backend
 from wandb.errors.error import UsageError
 from wandb.lib import console as lib_console
@@ -90,7 +91,6 @@ class _WandbInit(object):
 
         # Temporarily unsupported parameters
         unsupported = (
-            "magic",
             "config_exclude_keys",
             "config_include_keys",
             "allow_val_change",
@@ -111,6 +111,10 @@ class _WandbInit(object):
         sync_tensorboard = kwargs.pop("sync_tensorboard", None)
         if tensorboard or sync_tensorboard and len(wandb.patched["tensorboard"]) == 0:
             wandb.tensorboard.patch()
+
+        magic = kwargs.get("magic")
+        if magic not in (None, False):
+            magic_install(kwargs)
 
         # prevent setting project, entity if in sweep
         # TODO(jhr): these should be locked elements in the future or at least
@@ -296,7 +300,7 @@ class _WandbInit(object):
         self._wl._early_logger_flush(logger)
 
     def init(self):
-        trigger.call("on_init", **self.config)
+        trigger.call("on_init", **self.kwargs)
         s = self.settings
         config = self.config
 
@@ -400,7 +404,7 @@ def init(
     group: Optional[str] = None,
     name: Optional[str] = None,
     notes: Optional[str] = None,
-    magic: bool = None,  # TODO(jhr): type is union
+    magic: Union[dict, str, bool] = None,  # TODO(jhr): type is union
     config_exclude_keys=None,
     config_include_keys=None,
     anonymous: Optional[str] = None,
