@@ -859,10 +859,10 @@ def magic(ctx, program, args):
         click.echo(click.style("Could not launch program: %s" % program, fg="red"))
         sys.exit(1)
     globs = {
-            '__file__': program,
-            '__name__': '__main__',
-            '__package__': None,
-            'wandb_magic_install': magic_install,
+        '__file__': program,
+        '__name__': '__main__',
+        '__package__': None,
+        'wandb_magic_install': magic_install,
         }
     prep = '''
 import __main__
