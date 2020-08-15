@@ -23,6 +23,7 @@ from wandb import Error
 from wandb import wandb_agent
 from wandb import wandb_controller
 from wandb.apis import InternalApi, PublicApi
+from wandb.integration.magic import magic_install
 from wandb.old.settings import Settings
 from wandb.sync import SyncManager
 import yaml
@@ -366,7 +367,7 @@ def sweep(ctx, project, entity, controller, verbose, name, program, settings, up
     def _parse_settings(settings):
         """settings could be json or comma seperated assignments."""
         ret = {}
-        # TODO(jhr): merge with magic_impl:_parse_magic
+        # TODO(jhr): merge with magic:_parse_magic
         if settings.find('=') > 0:
             for item in settings.split(","):
                 kv = item.split("=")
@@ -835,7 +836,7 @@ def pull(run, project, entity):
                         bar.update(len(data))
 
 
-@cli.command(context_settings=MONKEY_CONTEXT, help="Run any script with wandb", hidden=True)
+@cli.command(context_settings=CONTEXT, help="Run any script with wandb", hidden=True)
 @click.pass_context
 @click.argument('program')
 @click.argument('args', nargs=-1)
