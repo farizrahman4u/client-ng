@@ -863,7 +863,7 @@ def magic(ctx, program, args):
         '__name__': '__main__',
         '__package__': None,
         'wandb_magic_install': magic_install,
-        }
+            }
     prep = '''
 import __main__
 __main__.__file__ = "%s"
