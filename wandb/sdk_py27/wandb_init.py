@@ -20,6 +20,7 @@ from wandb.lib import console as lib_console
 from wandb.lib import filesystem, module, reporting
 from wandb.old import io_wrap
 from wandb.util import sentry_exc
+from wandb.integration.magic import magic_install
 
 from .wandb_config import parse_config
 from .wandb_run import Run, RunDummy, RunManaged
@@ -90,7 +91,6 @@ class _WandbInit(object):
 
         # Temporarily unsupported parameters
         unsupported = (
-            "magic",
             "config_exclude_keys",
             "config_include_keys",
             "allow_val_change",
@@ -111,6 +111,10 @@ class _WandbInit(object):
         sync_tensorboard = kwargs.pop("sync_tensorboard", None)
         if tensorboard or sync_tensorboard and len(wandb.patched["tensorboard"]) == 0:
             wandb.tensorboard.patch()
+
+        magic = kwargs.get("magic")
+        if magic not in (None, False):
+            magic_install(kwargs)
 
         # prevent setting project, entity if in sweep
         # TODO(jhr): these should be locked elements in the future or at least
@@ -296,7 +300,7 @@ class _WandbInit(object):
         self._wl._early_logger_flush(logger)
 
     def init(self):
-        trigger.call("on_init", **self.config)
+        trigger.call("on_init", **self.kwargs)
         s = self.settings
         config = self.config
 
