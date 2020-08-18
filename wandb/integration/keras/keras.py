@@ -14,6 +14,7 @@ import os
 import numpy as np
 import wandb
 import sys
+from wandb.util import add_import_hook
 from importlib import import_module
 from itertools import chain
 
@@ -129,6 +130,19 @@ def patch_tf_keras():
         training.Model.fit = new_v2
         wandb.patched["keras"].append(
             ["tensorflow.python.keras.engine.training.Model", "fit"])
+
+
+def _check_keras_version():
+    import keras
+    keras_version = keras.__version__
+    major, minor, patch = keras_version.split('.')
+    if int(major) < 2 or int(minor) < 4:
+        wandb.termwarn(f"Keras version {keras_version} is not fully supported. Required keras >= 2.4.0")
+
+if 'keras' in sys.modules:
+    _check_keras_version()
+else:
+    add_import_hook('keras', _check_keras_version)
 
 
 import tensorflow.keras as keras
