@@ -957,7 +957,7 @@ class RunManaged(Run):
         return ret
 
     def _on_finish(self):
-        trigger.call('on_finished')
+        trigger.call("on_finished")
 
         # make sure all uncommitted history is flushed
         self.history._flush()
