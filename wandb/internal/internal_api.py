@@ -563,6 +563,8 @@ class Api(object):
         if len(run['files']['edges']) > 0:
             url = run['files']['edges'][0]['node']['directUrl']
             res = requests.get(url)
+            print(res)
+            print(res.body)
             res.raise_for_status()
             metadata = res.json()
         else:
