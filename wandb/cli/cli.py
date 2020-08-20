@@ -1090,7 +1090,6 @@ def restore(ctx, run, no_git, branch, project, entity):
     commit, json_config, patch_content, metadata = api.run_config(
         project, run=run, entity=entity
     )
-    print(metadata)
     repo = metadata.get("git", {}).get("repo")
     image = metadata.get("docker")
     restore_message = (
