@@ -654,7 +654,7 @@ def test_restore_no_remote(runner, mock_server, git_repo, docker, monkeypatch):
     assert result.exit_code == 0
     assert "Created branch wandb/abcdef" in result.output
     assert "Applied patch" in result.output
-    assert "Restored config variables to wandb" + os.sep in result.output
+    assert "Restored config variables to " + os.sep in result.output
     assert "Launching docker container" in result.output
     docker.assert_called_with(['docker', 'run', '-e', 'LANG=C.UTF-8', '-e', 'WANDB_DOCKER=wandb/deepo@sha256:abc123', '--ipc=host', '-v',
                                wandb.docker.entrypoint+':/wandb-entrypoint.sh', '--entrypoint', '/wandb-entrypoint.sh', '-v', os.getcwd()+
