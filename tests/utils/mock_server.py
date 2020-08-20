@@ -170,6 +170,29 @@ def set_ctx(ctx):
     g.ctx.set(ctx)
 
 
+
+def _bucket_config():
+    return {
+        'patch': '''
+diff --git a/patch.txt b/patch.txt
+index 30d74d2..9a2c773 100644
+--- a/patch.txt
++++ b/patch.txt
+@@ -1 +1 @@
+-test
+\ No newline at end of file
++testing
+\ No newline at end of file
+        ''',
+        'commit': 'HEAD',
+        'github': 'https://github.com/vanpelt',
+        'config': '{"foo":{"value":"bar"}}',
+        'files': {
+            'edges': [{'node': {'url': 'https://metadata.json'}}]
+        }
+    }
+
+
 def create_app(user_ctx=None):
     app = Flask(__name__)
     # When starting in live mode, user_ctx is a fancy object
@@ -224,6 +247,20 @@ def create_app(user_ctx=None):
                                     "uploadHeaders": [],
                                     "edges": [{"node": {"name": file, "url": url}}],
                                 },
+                                "patch": '''
+diff --git a/patch.txt b/patch.txt
+index 30d74d2..9a2c773 100644
+--- a/patch.txt
++++ b/patch.txt
+@@ -1 +1 @@
+-test
+\ No newline at end of file
++testing
+\ No newline at end of file
+        ''',
+        "github": 'https://github.com/vanpelt',
+        "commit": 'HEAD',
+        "config": '{"foo":{"value":"bar"}}'
                             }
                         }
                     }
