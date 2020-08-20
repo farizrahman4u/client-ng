@@ -74,7 +74,7 @@ def run(ctx):
                         "name": "weights.h5",
                         "sizeBytes": 20,
                         "md5": "XXX",
-                        "url": request.url_root + "/storage?file=weights.h5",
+                        "url": request.url_root + "/storage?file=metadata.json",
                         "directUrl": request.url_root + "/storage?file=weights.h5",
                     }
                 }
@@ -568,6 +568,8 @@ def create_app(user_ctx=None):
                     "digits.h5": {"digest": "TeSJ4xxXg0ohuL5xEdq2Ew==", "size": 81299}
                 },
             }
+        elif file == "metadata.json":
+            return {"docker": "test/docker", "program": "train.py", "args": ["--test", "foo"]}
         return "", 200
 
     @app.route("/artifacts/<entity>/<digest>", methods=["GET", "POST"])
