@@ -1134,7 +1134,7 @@ Run `git clone %s` and restore from there or pass the --no-git flag."""
                 raise ClickException(restore_message)
         else:
             if patch_content:
-                patch_path = os.path.join(wandb.wandb_dir(), "diff.patch")
+                patch_path = os.path.join(wandb_dir(), "diff.patch")
                 with open(patch_path, "w") as f:
                     f.write(patch_content)
             else:
