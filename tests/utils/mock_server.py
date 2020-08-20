@@ -565,8 +565,9 @@ def create_app(user_ctx=None):
                 "storagePolicy": "wandb-storage-policy-v1",
                 "storagePolicyConfig": {},
                 "contents": {
-                    "digits.h5": {"digest": "TeSJ4xxXg0ohuL5xEdq2Ew==", "size": 81299}
+                    "digits.h5": {"digest": "TeSJ4xxXg0ohuL5xEdq2Ew==", "size": 81299},
                 },
+                "docker": "test/docker", "program": "train.py", "args": ["--test", "foo"]
             }
         elif file == "metadata.json":
             return {"docker": "test/docker", "program": "train.py", "args": ["--test", "foo"]}
