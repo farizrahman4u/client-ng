@@ -79,6 +79,17 @@ def run(ctx):
                 }
             ]
         },
+        'patch': '''
+diff --git a/patch.txt b/patch.txt
+index 30d74d2..9a2c773 100644
+--- a/patch.txt
++++ b/patch.txt
+@@ -1 +1 @@
+-test
+\ No newline at end of file
++testing
+\ No newline at end of file
+        ''',
         'commit': 'HEAD',
         'github': 'https://github.com/vanpelt',
         'config': '{"foo":{"value":"bar"}}',
