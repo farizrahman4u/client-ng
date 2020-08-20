@@ -668,8 +668,8 @@ def test_restore_bad_remote(runner, mock_server, git_repo, docker, monkeypatch):
     mock_server.set_context("git", {"repo": "http://fake.git/foo/bar"})
     def bad_commit(cmt):
         raise ValueError()
-    monkeypatch.setattr(api.git.repo, 'commit', bad_commit)
-    monkeypatch.setattr(api, "download_urls", lambda *args, **kwargs: []) 
+    # monkeypatch.setattr(api.git.repo, 'commit', bad_commit)
+    # monkeypatch.setattr(api, "download_urls", lambda *args, **kwargs: []) 
     result = runner.invoke(cli.restore, ["wandb/test:abcdef"])
     print(result.output)
     print(traceback.print_tb(result.exc_info[2]))
