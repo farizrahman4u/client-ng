@@ -644,6 +644,7 @@ def test_local_already_running(runner, docker, local_settings):
 
 
 def test_restore_no_remote(runner, mock_server, git_repo, docker, monkeypatch):
+    print(mock_server)
     with open("patch.txt", "w") as f:
         f.write("test")
     git_repo.repo.index.add(["patch.txt"])
