@@ -75,6 +75,7 @@ def run(ctx):
                         "sizeBytes": 20,
                         "md5": "XXX",
                         "directUrl": request.url_root + "/storage?file=weights.h5",
+                        "url": request.url_root + "/storage?file=weights.h5",
                     }
                 }
             ]
