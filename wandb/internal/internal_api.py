@@ -556,6 +556,7 @@ class Api(object):
         if response['model'] == None:
             raise CommError("Run {}/{}/{} not found".format(entity, project, run) )
         run = response['model']['bucket']
+        print(run)
         commit = run['commit']
         patch = run['patch']
         config = json.loads(run['config'] or '{}')
