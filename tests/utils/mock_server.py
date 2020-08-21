@@ -80,20 +80,6 @@ def run(ctx):
                 }
             ]
         },
-        'patch': '''
-diff --git a/patch.txt b/patch.txt
-index 30d74d2..9a2c773 100644
---- a/patch.txt
-+++ b/patch.txt
-@@ -1 +1 @@
--test
-\ No newline at end of file
-+testing
-\ No newline at end of file
-        ''',
-        'commit': 'HEAD',
-        'github': 'https://github.com/vanpelt',
-        'config': '{"foo":{"value":"bar"}}',
         "sampledHistory": ['{"loss": 0, "acc": 100}'],
         "shouldStop": False,
         "failed": False,
@@ -306,13 +292,16 @@ def create_app(user_ctx=None):
         if "query Run(" in body["query"]:
             return json.dumps({"data": {"project": {"run": run(ctx)}}})
         if "query Model(" in body["query"]:
-            project_field_name = "model"
-            run_field_name = "bucket"
             if "project(" in body["query"]:
                 project_field_name = "project"
                 run_field_name = "run"
+                run_data = run(ctx)
+            else:
+                project_field_name = "model"
+                run_field_name = "bucket"
+                run_data = _bucket_config()
             return json.dumps(
-                {"data": {project_field_name: {run_field_name: run(ctx)}}}
+                {"data": {project_field_name: {run_field_name: _bucket_config()}}}
             )
         if "query Models(" in body["query"]:
             return json.dumps(
