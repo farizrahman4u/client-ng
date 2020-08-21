@@ -36,7 +36,7 @@ class Meta(object):
         self._interface = interface.BackendSender(
             process_queue=process_q, notify_queue=notify_q,
         )
-        self._git = git_repo.GitRepo(
+        self._git = GitRepo(
             remote=self._settings["git_remote"]
             if "git_remote" in self._settings.keys()
             else "origin"
