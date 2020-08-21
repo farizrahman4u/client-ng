@@ -74,7 +74,6 @@ def run(ctx):
                         "name": "weights.h5",
                         "sizeBytes": 20,
                         "md5": "XXX",
-                        "directUrl": request.url_root + "/storage?file=weights.h5",
                         "url": request.url_root + "/storage?file=weights.h5",
                     }
                 }
@@ -295,13 +294,15 @@ def create_app(user_ctx=None):
             if "project(" in body["query"]:
                 project_field_name = "project"
                 run_field_name = "run"
-                run_data = run(ctx)
             else:
                 project_field_name = "model"
                 run_field_name = "bucket"
-                run_data = _bucket_config()
+            if "commit" in body["query"]:
+                run_config = _bucket_config()
+            else:
+                run_config = run(ctx)
             return json.dumps(
-                {"data": {project_field_name: {run_field_name: _bucket_config()}}}
+                {"data": {project_field_name: {run_field_name: run_config}}}
             )
         if "query Models(" in body["query"]:
             return json.dumps(
