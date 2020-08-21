@@ -188,7 +188,7 @@ index 30d74d2..9a2c773 100644
         'github': 'https://github.com/vanpelt',
         'config': '{"foo":{"value":"bar"}}',
         'files': {
-            'edges': [{'node': {'directUrl': request.url_root + "/storage?file=metadata.json"}]
+            'edges': [{'node': {'directUrl': request.url_root + "/storage?file=metadata.json"}}]
         }
     }
 
