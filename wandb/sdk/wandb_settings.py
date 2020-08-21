@@ -140,7 +140,7 @@ def _get_program():
 
 
 def _get_program_relpath_from_gitrepo(program):
-    repo = git_repo.GitRepo()
+    repo = GitRepo()
     root = repo.root
     if not root:
         root = os.getcwd()
