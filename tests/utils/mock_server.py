@@ -188,7 +188,7 @@ index 30d74d2..9a2c773 100644
         'github': 'https://github.com/vanpelt',
         'config': '{"foo":{"value":"bar"}}',
         'files': {
-            'edges': [{'node': {'directUrl': 'https://metadata.json'}}]
+            'edges': [{'node': {'directUrl': request.url_root + "/storage?file=metadata.json"}]
         }
     }
 
@@ -558,7 +558,7 @@ def create_app(user_ctx=None):
                     "digits.h5": {"digest": "TeSJ4xxXg0ohuL5xEdq2Ew==", "size": 81299},
                 },
             }
-        else:
+        elif file == "metadata.json":
             return {"docker": "test/docker", "program": "train.py", "args": ["--test", "foo"]}
         return "", 200
 
