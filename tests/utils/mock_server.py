@@ -74,11 +74,25 @@ def run(ctx):
                         "name": "weights.h5",
                         "sizeBytes": 20,
                         "md5": "XXX",
-                        "url": request.url_root + "/storage?file=weights.h5",
+                        "directUrl": request.url_root + "/storage?file=weights.h5",
                     }
                 }
             ]
         },
+        'patch': '''
+diff --git a/patch.txt b/patch.txt
+index 30d74d2..9a2c773 100644
+--- a/patch.txt
++++ b/patch.txt
+@@ -1 +1 @@
+-test
+\ No newline at end of file
++testing
+\ No newline at end of file
+        ''',
+        'commit': 'HEAD',
+        'github': 'https://github.com/vanpelt',
+        'config': '{"foo":{"value":"bar"}}',
         "sampledHistory": ['{"loss": 0, "acc": 100}'],
         "shouldStop": False,
         "failed": False,
