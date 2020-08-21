@@ -13,8 +13,8 @@ import sys
 
 from wandb import util
 from wandb.interface import interface
-from wandb.internal import git_repo
 from wandb.lib.filenames import DIFF_FNAME, METADATA_FNAME, REQUIREMENTS_FNAME
+from wandb.lib.git import GitRepo
 from wandb.vendor.pynvml import pynvml
 
 if os.name == "posix" and sys.version_info[0] < 3:
