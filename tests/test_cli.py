@@ -713,7 +713,6 @@ def test_restore_no_entity(runner, mock_server, git_repo, docker, monkeypatch):
 
 def test_restore_not_git(runner, mock_server, docker, monkeypatch):
     with runner.isolated_filesystem():
-        mock_server.set_context("git", {"repo": "http://fake.git/foo/bar"})
         monkeypatch.setattr(cli, '_api', InternalApi({'project': 'test'}))
         result = runner.invoke(cli.restore, ["test/abcdef"])
         print(result.output)
