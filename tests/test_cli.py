@@ -644,7 +644,6 @@ def test_local_already_running(runner, docker, local_settings):
 
 
 def test_restore_no_remote(runner, mock_server, git_repo, docker, monkeypatch):
-    print(mock_server)
     with open("patch.txt", "w") as f:
         f.write("test")
     git_repo.repo.index.add(["patch.txt"])
@@ -667,7 +666,7 @@ def test_restore_bad_remote(runner, mock_server, git_repo, docker, monkeypatch):
     # git_repo creates it's own isolated filesystem
     mock_server.set_context("git", {"repo": "http://fake.git/foo/bar"})
     api = InternalApi({'project': 'test'})
-    monkeypatch.setattr(wandb, 'api', api)
+    monkeypatch.setattr(cli, '_api', api)
     def bad_commit(cmt):
         raise ValueError()
     monkeypatch.setattr(api.git.repo, 'commit', bad_commit)
