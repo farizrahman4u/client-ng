@@ -17,7 +17,7 @@ from wandb.filesync.dir_watcher import DirWatcher
 from wandb.interface import interface
 from wandb.lib.config import save_config_file_from_dict
 from wandb.lib.dict import dict_from_proto_list
-from wandb.ib.git import GitRepo
+from wandb.lib.git import GitRepo
 from wandb.lib.filenames import (
     CONFIG_FNAME,
     EVENTS_FNAME,
