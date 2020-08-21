@@ -17,6 +17,7 @@ from wandb.filesync.dir_watcher import DirWatcher
 from wandb.interface import interface
 from wandb.lib.config import save_config_file_from_dict
 from wandb.lib.dict import dict_from_proto_list
+from wandb.ib.git import GitRepo
 from wandb.lib.filenames import (
     CONFIG_FNAME,
     EVENTS_FNAME,
@@ -35,7 +36,6 @@ from . import file_stream
 from . import internal_api
 from . import tb_watcher
 from .file_pusher import FilePusher
-from .git_repo import GitRepo
 
 
 logger = logging.getLogger(__name__)
