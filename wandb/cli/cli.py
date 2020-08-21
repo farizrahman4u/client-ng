@@ -24,9 +24,9 @@ from wandb import Error
 from wandb import wandb_agent
 from wandb import wandb_controller
 from wandb.apis import InternalApi, PublicApi
+from wandb.config import Config
 from wandb.integration.magic import magic_install
 from wandb.old.settings import Settings
-from wandb.sdk import Config
 from wandb.sync import SyncManager
 import yaml
 
