@@ -189,7 +189,7 @@ index 30d74d2..9a2c773 100644
         'github': 'https://github.com/vanpelt',
         'config': '{"foo":{"value":"bar"}}',
         'files': {
-            'edges': [{'node': {'url': 'https://metadata.json'}}]
+            'edges': [{'node': {'directUrl': 'https://metadata.json'}}]
         }
     }
 
