@@ -84,7 +84,7 @@ class CRDedupeFilePolicy(DefaultFilePolicy):
                     if line.endswith('\x1b\x5b\x41'):
                         if ret:
                             ret.pop()
-                    else:
+                        line = line[:-1]
                     ret.append(line + os.linesep)
         chunk_id = self._chunk_id
         self._chunk_id += len(ret)
