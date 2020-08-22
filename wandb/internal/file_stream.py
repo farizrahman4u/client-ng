@@ -85,7 +85,7 @@ class CRDedupeFilePolicy(DefaultFilePolicy):
                         if ret:
                             ret.pop()
                     else:
-                        ret.append(line + os.linesep)
+                    ret.append(line + os.linesep)
         chunk_id = self._chunk_id
         self._chunk_id += len(ret)
         return {
