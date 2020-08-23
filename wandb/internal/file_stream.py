@@ -143,8 +143,8 @@ class CRDedupeFilePolicy(DefaultFilePolicy):
                 if line:
                     if line.endswith('\x1b\x5b\x41'):
                         if ret:
-                            ret.pop()
-                        line = line[:-1]
+                            pass#ret.pop()
+                        #line = line[:-len('\x1b\x5b\x41')]
                     ret.append(line + os.linesep)
         chunk_id = self._chunk_id
         self._chunk_id += len(ret)
