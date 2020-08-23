@@ -11,6 +11,7 @@ from six.moves import queue
 from wandb import util
 from wandb import env
 import os
+import re
 
 
 MAX_LINE_SIZE = 4*1024*1024 - 100*1024  # imposed by back end
