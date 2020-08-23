@@ -134,17 +134,15 @@ class CRDedupeFilePolicy(DefaultFilePolicy):
     def process_chunks(self, chunks):
         ret = []
         for c in chunks:
-            ret += self.add_string(c.data)
-
-            # lines = c.data.split(os.linesep)
-            # for line in lines:
-            #     line = line.split('\r')[-1]
-            #     if line:
-            #         if line.endswith('\x1b\x5b\x41'):
-            #             if ret:
-            #                 ret.pop()
-            #             line = line[:-1]
-            #         ret.append(line + os.linesep)
+            lines = c.data.split(os.linesep)
+            for line in lines:
+                line = line.split('\r')[-1]
+                if line:
+                    if line.endswith('\x1b\x5b\x41'):
+                        if ret:
+                            ret.pop()
+                        line = line[:-1]
+                    ret.append(line + os.linesep)
         chunk_id = self._chunk_id
         self._chunk_id += len(ret)
         return {
