@@ -77,9 +77,9 @@ class CRDedupeFilePolicy(DefaultFilePolicy):
     def process_chunks(self, chunks):
         ret = []
         for c in chunks:
-            # print('-------')
-            # print([c.data])
-            # print('-------')
+            print('-------')
+            print([c.data])
+            print('-------')
             lines = c.data.split(os.linesep)
             for line in lines:
                 line = line.split('\r')[-1]
@@ -87,9 +87,9 @@ class CRDedupeFilePolicy(DefaultFilePolicy):
                     ret.append(line + os.linesep)
         chunk_id = self._chunk_id
         self._chunk_id += len(ret)
-        # print("=============")
-        # print(ret)
-        # print("=============")
+        print("=============")
+        print(ret)
+        print("=============")
         return {
             'offset': chunk_id,
             'content': ret
