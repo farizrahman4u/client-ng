@@ -135,7 +135,7 @@ class CRDedupeFilePolicy(DefaultFilePolicy):
         ret = []
         for c in chunks:
             print('-------')
-            print(c.data)
+            print([c.data])
             print('-------')
             lines = c.data.split(os.linesep)
             for line in lines:
