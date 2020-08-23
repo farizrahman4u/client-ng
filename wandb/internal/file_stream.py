@@ -85,9 +85,10 @@ class CRDedupeFilePolicy(DefaultFilePolicy):
             for line in lines:
                 line = line.split('\r')[-1]
                 if line:
-                    if flag and line.endswith('\x1b\x5b\x41'):
-                        ret.pop()
-                        flag = False
+                    if line.endswith('\x1b\x5b\x41'):
+                        if flag:
+                            ret.pop()
+                            flag = False
                     else:
                         ret.append(line + os.linesep)
                         flag = True
