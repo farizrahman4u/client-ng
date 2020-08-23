@@ -145,7 +145,8 @@ class CRDedupeFilePolicy(DefaultFilePolicy):
                         if ret:
                             pass#ret.pop()
                         #line = line[:-len('\x1b\x5b\x41')]
-                    ret.append(line + os.linesep)
+                    else:
+                        ret.append(line + os.linesep)
         chunk_id = self._chunk_id
         self._chunk_id += len(ret)
         print("=============")
