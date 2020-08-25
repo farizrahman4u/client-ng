@@ -95,7 +95,7 @@ class CRDedupeFilePolicy(DefaultFilePolicy):
         chunk_id = self._chunk_id
         self._chunk_id += len(ret)
         print("=====")
-        print(Ret)
+        print(ret)
         print("=====")
         return {
             'offset': chunk_id,
