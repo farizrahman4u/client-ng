@@ -75,6 +75,9 @@ class CRDedupeFilePolicy(DefaultFilePolicy):
     """
 
     def process_chunks(self, chunks):
+        print("-----")
+        print(chunks)
+        print("-----")
         ret = []
         flag = False
         for c in chunks:
