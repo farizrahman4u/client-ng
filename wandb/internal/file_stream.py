@@ -81,6 +81,8 @@ class CRDedupeFilePolicy(DefaultFilePolicy):
         ret = []
         flag = False
         for c in chunks:
+            s = c.data.split(':')
+            tstamp = s[0] + ':' s[1].split(' ')[0]
             lines = c.data.split(os.linesep)
             for line in lines:
                 line = line.split('\r')[-1]
@@ -90,7 +92,7 @@ class CRDedupeFilePolicy(DefaultFilePolicy):
                             ret.pop()
                             flag = False
                     else:
-                        ret.append(line + os.linesep)
+                        ret.append(tstamp + ' ' + line + os.linesep)
                         flag = True
         chunk_id = self._chunk_id
         self._chunk_id += len(ret)
