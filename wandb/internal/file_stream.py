@@ -91,8 +91,6 @@ class CRDedupeFilePolicy(DefaultFilePolicy):
                         flag = True
         chunk_id = self._chunk_id
         self._chunk_id += len(ret)
-        if ret and ret[-1].endswith('\r'):
-            self._chunk_id -= 1
         return {
             'offset': chunk_id,
             'content': ret
