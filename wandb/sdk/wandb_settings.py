@@ -450,8 +450,8 @@ class Settings(six.with_metaclass(CantTouchThis, object)):
         u = {}
         if self.console == "auto":
             console = "redirect"
-            if self.jupyter:
-                console = "off"
+            # if self.jupyter:
+            #     console = "iowrap"
             # if self.windows:
             #     console = "off"
             u["console"] = console

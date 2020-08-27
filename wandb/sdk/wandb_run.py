@@ -850,22 +850,29 @@ class RunManaged(Run):
             out_cap = redirect.Capture(
                 name="stdout", cb=self._redirect_cb, output_writer=self._output_writer
             )
-            out_redir = redirect.Redirect(
-                src="stdout", dest=out_cap, unbuffered=True, tee=True
-            )
             err_cap = redirect.Capture(
                 name="stderr", cb=self._redirect_cb, output_writer=self._output_writer
             )
-            err_redir = redirect.Redirect(
-                src="stderr", dest=err_cap, unbuffered=True, tee=True
-            )
+
+            if "jupyter":
+                out_redir = redirect.StreamWrapper(name="stdout", cb=self._redirect_cb)
+                err_redir = redirect.StreamWrapper(name="stderr", cb=self._redirect_cb)
+            else:
+                out_redir = redirect.Redirect(
+                    src="stdout", dest=out_cap, unbuffered=True, tee=True
+                )
+                err_redir = redirect.Redirect(
+                    src="stderr", dest=err_cap, unbuffered=True, tee=True
+                )
             try:
                 out_redir.install()
                 err_redir.install()
+                print("====installed====")
                 self._out_redir = out_redir
                 self._err_redir = err_redir
                 logger.info("redirect2")
             except (OSError, AttributeError) as e:
+                print(e)
                 logger.error("failed to redirect", exc_info=e)
             return
 
