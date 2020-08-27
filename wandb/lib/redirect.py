@@ -40,6 +40,7 @@ class StreamWrapper(object):
     def install(self):
         if self.installed:
             return
+        # TODO(farizrahman4u): patch writelines too?
         old_write = self.stream.write
         name = self.name
         cb = self.cb
@@ -54,9 +55,6 @@ class StreamWrapper(object):
         if self.installed:
             self.src.write = self._old_write
             self.installed = False
-
-    def __getattr__(self, attr):
-        return getattr(self.src, attr)
 
 
 def _pipe_relay(stopped, fd, name, cb, tee, output_writer):
