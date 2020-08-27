@@ -846,7 +846,7 @@ class RunManaged(Run):
         logger.info("redirect: %s", console)
 
         if console == "redirect":
-            logger.info("redirect1")
+            logger.info("Redirecting console.")
             out_cap = redirect.Capture(
                 name="stdout", cb=self._redirect_cb, output_writer=self._output_writer
             )
@@ -860,7 +860,7 @@ class RunManaged(Run):
                 src="stderr", dest=err_cap, unbuffered=True, tee=True
             )
         elif console == "notebook":
-            logger.info("redirect1")
+            logger.info("Redirecting notebook output.")
             out_redir = redirect.StreamWrapper(name="stdout", cb=self._redirect_cb)
             err_redir = redirect.StreamWrapper(name="stderr", cb=self._redirect_cb)
         else:
@@ -870,10 +870,10 @@ class RunManaged(Run):
             err_redir.install()
             self._out_redir = out_redir
             self._err_redir = err_redir
-            logger.info("redirect2")
+            logger.info("Redirects installed.")
         except (OSError, AttributeError) as e:
             print(e)
-            logger.error("failed to redirect", exc_info=e)
+            logger.error("Failed to redirect.", exc_info=e)
         return
 
         # TODO(jhr): everything below here is not executed as we only support redir mode
