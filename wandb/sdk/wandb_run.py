@@ -845,7 +845,6 @@ class RunManaged(Run):
         console = self._settings.console
         logger.info("redirect: %s", console)
 
-
         if console == "redirect":
             logger.info("redirect1")
             out_cap = redirect.Capture(
