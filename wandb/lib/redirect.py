@@ -44,12 +44,13 @@ class StreamWrapper(object):
         old_write = self.stream.write
         name = self.name
         cb = self.cb
+
         def new_write(data):
             cb(name, data)
             old_write(data)
         self.stream.write = new_write
         self._old_write = old_write
-        installed = True
+        self.installed = True
 
     def uninstall(self):
         if self.installed:
