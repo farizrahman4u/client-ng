@@ -45,12 +45,16 @@ class TPUProfiler(object):
 
     def _kill_capture_process(self):
         try:
+            print("Killing capture process..")
             self._capture_process.kill()
-        except Exception:
-            pass
+            print("Killed.")
+        except Exception as e:
+            print("Error killing capture process: " + str(e))
 
     def _thread_body(self):
         while not self._stop_thread:
+            if not self._is_capture_process_alive():
+                self._start_capture_process()
             watchdog = _WatchdogTimer(timeout=10,
                                         callback=self._kill_capture_process,
                                         daemon=True)
