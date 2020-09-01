@@ -58,7 +58,7 @@ class TPUProfiler(object):
     def _thread_body(self):
         while not self._stop_thread:
             line = self._readline()
-            if line.startswith("Utilization "):
+            if line.strip().startswith("Utilization "):
                 self._tpu_utilization = float(line.split(': ')[1].split('%')[0])
                 self._time = time.time()
                 continue
