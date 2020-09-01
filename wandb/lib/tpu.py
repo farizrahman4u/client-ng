@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 class TPUProfiler(object):
 
-    def __init__(self):
+    def __init__(self, duration_ms=1000):
         try:
             import cloud_tpu_profiler
             del cloud_tpu_profiler  # flake8
@@ -23,6 +23,7 @@ class TPUProfiler(object):
         self._tpu_utilization = 0.
         self._time = time.time()
         self._running = False
+        self.duration_ms = duration_ms
 
     def start(self):
         if not self._enabled or self._running:
@@ -36,6 +37,8 @@ class TPUProfiler(object):
     def _start_capture_process(self):
         args = ["capture_tpu_profile",
                 "--tpu=" + os.environ['TPU_NAME'],
+                "--num_queries=100000",
+                "--duration_ms=" + str(self.duration_ms),
                 "--monitoring_level=2"]
         self._capture_process = Popen(args,
                                       stdout=PIPE,
