@@ -23,9 +23,6 @@ class TPUProfiler(object):
         self._tpu_utilization = 0.
         self._time = time.time()
         self._validity_timeout = 5  # seconds
-        self._watchdog = _WatchdogTimer(timeout=3,
-                                        callback=self._kill_capture_process,
-                                        daemon=True)
         self.start()
 
     def start(self):
@@ -53,14 +50,15 @@ class TPUProfiler(object):
             pass
 
     def _thread_body(self):
+        watchdog = _WatchdogTimer(timeout=10,
+                                    callback=self._kill_capture_process,
+                                    daemon=True)
         while not self._stop_thread:
-            watchdog = _WatchdogTimer(timeout=10,
-                                      callback=self._kill_capture_process,
-                                      daemon=True)
             watchdog.start()
             for line in self._capture_process.stdout:
                 if line.startswith("Utilization "):
                     self._tpu_utilization = float(line.split(': ')[1].split('%')[0])
+                    print(self._tpu_utilization)
                     self._time = time.time()
                     with self._watchdog.blocked:
                         self._watchdog.restart()
