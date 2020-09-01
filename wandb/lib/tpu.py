@@ -51,7 +51,7 @@ class TPUProfiler(object):
     def _kill_capture_process(self):
         try:
             self._capture_process.kill()
-        except:
+        except Exception:
             pass
 
     def _readline(self):
