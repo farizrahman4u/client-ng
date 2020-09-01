@@ -20,9 +20,9 @@ class TPUProfiler(object):
                         "TPU stats will not be captured.")
             self._enabled = False
             return
-        self._tpu_utilization = 0.
+        self._tpu_utilization = -1.
         self._time = time.time()
-        self._validity_timeout = 5  # seconds
+        self._validity_timeout = 10  # seconds
         self.start()
 
     def start(self):
