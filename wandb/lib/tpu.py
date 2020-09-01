@@ -20,10 +20,9 @@ class TPUProfiler(object):
                         "TPU stats will not be captured.")
             self._enabled = False
             return
-        self._tpu_utilization = -1.
+        self._tpu_utilization = 0.
         self._time = time.time()
-        self._validity_timeout = 5  # seconds
-        self.start()        
+        self.start()
 
     def start(self):
         self._start_capture_process()
@@ -58,19 +57,13 @@ class TPUProfiler(object):
     def _thread_body(self):
         while not self._stop_thread:
             line = self._readline()
-            if line:
-                print(line)
             if line.strip().startswith("Utilization "):
                 self._tpu_utilization = float(line.split(': ')[1].split('%')[0])
                 self._time = time.time()
             time.sleep(0.5)
 
-    def _is_valid(self):
-        return True
-        return time.time() - self._time < self._validity_timeout
-
     def get_tpu_utilization(self):
-        if self._enabled and self._is_valid():
+        if self._enabled:
             return self._tpu_utilization
         return 0.
 
