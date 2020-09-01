@@ -50,10 +50,10 @@ class TPUProfiler(object):
             pass
 
     def _thread_body(self):
-        watchdog = _WatchdogTimer(timeout=10,
-                                    callback=self._kill_capture_process,
-                                    daemon=True)
         while not self._stop_thread:
+            watchdog = _WatchdogTimer(timeout=10,
+                                        callback=self._kill_capture_process,
+                                        daemon=True)
             watchdog.start()
             for line in self._capture_process.stdout:
                 if line.startswith("Utilization "):
