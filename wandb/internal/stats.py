@@ -77,10 +77,8 @@ class SystemStats(object):
                 "psutil not installed, only GPU stats will be reported.  Install with pip install psutil")
         self._thread = None
         if "TPU_NAME" in os.environ:
-            wandb.termlog("TPU detected. Starting TPU profiler...")
             self._tpu_profiler = TPUProfiler()
         else:
-            wandb.termlog("No TPU!")
             self._tpu_profiler = None
 
     def start(self):
@@ -209,6 +207,5 @@ class SystemStats(object):
             except psutil.NoSuchProcess:
                 pass
         if self._tpu_profiler:
-            wandb.termlog("Tpu utilization: " + str(self._tpu_profiler.get_tpu_utilization()) + "%")
             stats["tpu"] = self._tpu_profiler.get_tpu_utilization()
         return stats

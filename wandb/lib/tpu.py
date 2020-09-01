@@ -23,6 +23,12 @@ class TPUProfiler(object):
         self._tpu_utilization = 0.
         self._time = time.time()
         self._validity_timeout = 5  # seconds
+        self._watchdog = _WatchdogTimer(timeout=3,
+                                        callback=self._kill_capture_process,
+                                        daemon=True)
+        self.start()
+
+    def start(self):
         self._start_capture_process()
         self._stop_thread = False
         self._thread = threading.Thread(target=self._thread_body)
@@ -40,18 +46,27 @@ class TPUProfiler(object):
     def _is_capture_process_alive(self):
         return self._capture_process.poll() is None
 
-    def _readline(self):
-        if not self._is_capture_process_alive():
-            self._start_capture_process()
-        return self._capture_process.stdout.readline()
+    def _kill_capture_process(self):
+        try:
+            self._capture_process.kill()
+        except Exception:
+            pass
 
     def _thread_body(self):
         while not self._stop_thread:
-            line = self._readline()
-            if line.startswith("Utilization "):
-                self._tpu_utilization = float(line.split(': ')[1].split('%')[0])
-                self._time = time.time()
-                continue
+            watchdog = _WatchdogTimer(timeout=10,
+                                      callback=self._kill_capture_process,
+                                      daemon=True)
+            watchdog.start()
+            for line in self._capture_process.stdout:
+                if line.startswith("Utilization "):
+                    self._tpu_utilization = float(line.split(': ')[1].split('%')[0])
+                    self._time = time.time()
+                    with self._watchdog.blocked:
+                        self._watchdog.restart()
+            watchdog.cancel()
+            self._kill_capture_process()
+            self._start_capture_process()
 
     def _is_valid(self):
         return time.time() - self._time < self._validity_timeout
@@ -65,6 +80,33 @@ class TPUProfiler(object):
         if self._enabled:
             self._stop_thread = True
             self._thread.join()
+            self._kill_capture_process()
 
     def is_enabled(self):
         return self._enabled
+
+
+class _WatchdogTimer(threading.Thread):
+    """Run *callback* in *timeout* seconds unless the timer is restarted."""
+
+    def __init__(self, timeout, callback, *args, timer=time.monotonic, **kwargs):
+        super().__init__(**kwargs)
+        self.timeout = timeout
+        self.callback = callback
+        self.args = args
+        self.timer = timer
+        self.cancelled = threading.Event()
+        self.blocked = threading.Lock()
+
+    def run(self):
+        self.restart()
+        while not self.cancelled.wait(self.deadline - self.timer()):
+            with self.blocked:
+                if self.deadline <= self.timer() and not self.cancelled.is_set():
+                    return self.callback(*self.args)
+
+    def restart(self):
+        self.deadline = self.timer() + self.timeout
+
+    def cancel(self):
+        self.cancelled.set()
