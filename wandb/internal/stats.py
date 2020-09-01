@@ -78,6 +78,7 @@ class SystemStats(object):
         self._thread = None
         if "TPU_NAME" in os.environ:
             self._tpu_profiler = TPUProfiler()
+            self._tpu_profiler.start()
         else:
             self._tpu_profiler = None
 

@@ -22,9 +22,12 @@ class TPUProfiler(object):
             return
         self._tpu_utilization = 0.
         self._time = time.time()
-        self.start()
+        self._running = False
 
     def start(self):
+        if not self._enabled or self._running:
+            return
+        self._running = True
         self._start_capture_process()
         self._stop_thread = False
         self._thread = threading.Thread(target=self._thread_body)
@@ -68,10 +71,14 @@ class TPUProfiler(object):
         return 0.
 
     def stop(self):
-        if self._enabled:
+        if self._enabled and self._running:
             self._stop_thread = True
             self._thread.join()
             self._kill_capture_process()
+            self._running = False
 
     def is_enabled(self):
         return self._enabled
+
+    def is_running(self):
+        return self._running
