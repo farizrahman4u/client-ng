@@ -30,6 +30,28 @@ class Unbuffered(object):
         return getattr(self.stream, attr)
 
 
+class StreamFork(object):
+
+    def __init__(self, output_streams, unbuffered=False):
+        self.outptut_streams = output_streams
+        self.unbuffered = unbuffered
+
+    def write(self, data):
+        for stream in self.output_streams:
+            stream.write(data)
+            if self.unbuffered:
+                stream.flush()
+
+    def writelines(self, datas):
+        for stream in self.output_streams:
+            stream.writelines(datas)
+            if self.unbuffered:
+                stream.flush()
+
+    def __getattr__(self, attr):
+        return getattr(self.output_streams[0], attr)
+
+
 class StreamWrapper(object):
     def __init__(self, name, cb, output_writer=None):
         self.name = name
@@ -119,9 +141,14 @@ class Redirect(object):
             # Do not close old filedescriptor as others might be using it
             fp.close()
         os.dup2(to_fd, self._old_fd)
-        setattr(sys, self._stream, os.fdopen(self._old_fd, "w"))
-        if unbuffered:
-            setattr(sys, self._stream, Unbuffered(getattr(sys, self._stream)))
+        if getattr(sys, self._stream) == getattr(sys, "__%s__"%self._stream):
+            setattr(sys, self._stream, os.fdopen(self._old_fd, "w"))
+            if unbuffered:
+                setattr(sys, self._stream, Unbuffered(getattr(sys, self._stream)))
+        else:
+            setattr(sys, self._stream, StreamFork([getattr(sys, self._stream),
+                                                   os.fdopen(self._old_fd, "w")],
+                                                   unbuffered=unbuffered))
 
     def install(self):
         if self._installed:
