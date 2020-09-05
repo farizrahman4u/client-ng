@@ -41,7 +41,7 @@ class StreamFork(object):
         unbuffered = object.__getattribute__(self, 'unbuffered')
         for stream in output_streams:
             stream.write(data)
-            if self.unbuffered:
+            if unbuffered:
                 stream.flush()
 
     def writelines(self, datas):
@@ -49,7 +49,7 @@ class StreamFork(object):
         unbuffered = object.__getattribute__(self, 'unbuffered')
         for stream in output_streams:
             stream.writelines(datas)
-            if self.unbuffered:
+            if unbuffered:
                 stream.flush()
 
     def __getattr__(self, attr):
@@ -146,7 +146,7 @@ class Redirect(object):
             # Do not close old filedescriptor as others might be using it
             fp.close()
         os.dup2(to_fd, self._old_fd)
-        if getattr(sys, self._stream) == getattr(sys, "__%s__"%self._stream):
+        if getattr(sys, self._stream) == getattr(sys, "__%s__" % self._stream):
             setattr(sys, self._stream, os.fdopen(self._old_fd, "w"))
             if unbuffered:
                 setattr(sys, self._stream, Unbuffered(getattr(sys, self._stream)))
@@ -155,8 +155,8 @@ class Redirect(object):
                 setattr(sys, self._stream, getattr(sys, self._stream).output_streams[0])
             else:
                 setattr(sys, self._stream, StreamFork([getattr(sys, self._stream),
-                                                    os.fdopen(self._old_fd, "w")],
-                                                    unbuffered=unbuffered))
+                                                      os.fdopen(self._old_fd, "w")],
+                                                      unbuffered=unbuffered))
 
     def install(self):
         if self._installed:
@@ -172,7 +172,7 @@ class Redirect(object):
 
         logger.info("install start")
 
-        fp = getattr(sys, "__%s__"%self._stream)
+        fp = getattr(sys, "__%s__" % self._stream)
         fd = fp.fileno()
         old_fp = os.fdopen(os.dup(fd), "w")
 
