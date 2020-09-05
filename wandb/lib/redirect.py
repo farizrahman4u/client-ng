@@ -146,9 +146,12 @@ class Redirect(object):
             if unbuffered:
                 setattr(sys, self._stream, Unbuffered(getattr(sys, self._stream)))
         else:
-            setattr(sys, self._stream, StreamFork([getattr(sys, self._stream),
-                                                   os.fdopen(self._old_fd, "w")],
-                                                   unbuffered=unbuffered))
+            if close:
+                setattr(sys, self._stream, getattr(sys, self._stream).output_streams[0])
+            else:
+                setattr(sys, self._stream, StreamFork([getattr(sys, self._stream),
+                                                    os.fdopen(self._old_fd, "w")],
+                                                    unbuffered=unbuffered))
 
     def install(self):
         if self._installed:
