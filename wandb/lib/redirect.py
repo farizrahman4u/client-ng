@@ -33,24 +33,28 @@ class Unbuffered(object):
 class StreamFork(object):
 
     def __init__(self, output_streams, unbuffered=False):
-        assert self not in output_streams
         self.outptut_streams = output_streams
         self.unbuffered = unbuffered
 
     def write(self, data):
-        for stream in self.output_streams:
+        output_streams = object.__getattribute__(self, 'output_streams')
+        unbuffered = object.__getattribute__(self, 'unbuffered')
+        for stream in output_streams:
             stream.write(data)
             if self.unbuffered:
                 stream.flush()
 
     def writelines(self, datas):
-        for stream in self.output_streams:
+        output_streams = object.__getattribute__(self, 'output_streams')
+        unbuffered = object.__getattribute__(self, 'unbuffered')
+        for stream in output_streams:
             stream.writelines(datas)
             if self.unbuffered:
                 stream.flush()
 
     def __getattr__(self, attr):
-        return getattr(self.output_streams[0], attr)
+        output_streams = object.__getattribute__(self, 'output_streams')
+        return getattr(output_streams[0], attr)
 
 
 class StreamWrapper(object):
