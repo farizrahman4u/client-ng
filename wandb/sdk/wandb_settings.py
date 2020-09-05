@@ -374,7 +374,7 @@ class Settings(object):
         console: str = self.console
         if console == "auto":
             if self._jupyter:
-                console = "notebook"
+                console = "redirect"
             elif self._windows:
                 legacy_env_var = "PYTHONLEGACYWINDOWSSTDIO"
                 if sys.version_info >= (3, 6) and legacy_env_var not in os.environ:
