@@ -33,6 +33,7 @@ class Unbuffered(object):
 class StreamFork(object):
 
     def __init__(self, output_streams, unbuffered=False):
+        assert self not in output_streams
         self.outptut_streams = output_streams
         self.unbuffered = unbuffered
 
