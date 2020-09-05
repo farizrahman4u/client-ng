@@ -33,7 +33,7 @@ class Unbuffered(object):
 class StreamFork(object):
 
     def __init__(self, output_streams, unbuffered=False):
-        self.outptut_streams = output_streams
+        self.output_streams = output_streams
         self.unbuffered = unbuffered
 
     def write(self, data):
