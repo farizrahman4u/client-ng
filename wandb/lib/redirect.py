@@ -3,6 +3,7 @@
 util/redirect.
 """
 
+import io
 import logging
 import os
 import sys
@@ -139,10 +140,18 @@ class Redirect(object):
         self._old_fd = None
         self._old_fp = None
 
-        # whether stream was already wrapped (notebooks)
-        self._io_wrapped = (getattr(sys, src) !=
-                            getattr(sys, "__%s__" % src))
-        print("IO Wrapped: " + str(self._io_wrapped))
+        _src = getattr(sys, src)
+        if _src != getattr(sys, "__%s__" % src):
+            if hasattr(_src, "fileno"):
+                try:
+                    getattr(_src, "fileno")()
+                    self._io_wrapped = False
+                except io.UnsupportedOperation:
+                    self._io_wrapped = True
+            else:
+                self._io_wrapped = True
+        else:
+            self._io_wrapped = False
 
     def _redirect(self, to_fd, unbuffered=False, close=False):
         if close:
@@ -151,6 +160,13 @@ class Redirect(object):
             # Do not close old filedescriptor as others might be using it
             fp.close()
         os.dup2(to_fd, self._old_fd)
+        if self._io_wrapped:
+            if close:
+                setattr(sys, self._stream, self._stream.output_streams[0])
+            else:
+                setattr(sys, self._stream, StreamFork([getattr(sys, self._stream),
+                                                      os.fdopen(self._old_fd, "w")],
+                                                      unbuffered=unbuffered))
         setattr(sys, self._stream, os.fdopen(self._old_fd, "w"))
         if unbuffered:
             setattr(sys, self._stream, Unbuffered(getattr(sys, self._stream)))
