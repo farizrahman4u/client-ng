@@ -144,7 +144,7 @@ class Redirect(object):
         if _src != getattr(sys, "__%s__" % src):
             if hasattr(_src, "fileno"):
                 try:
-                    getattr(_src, "fileno")()
+                    _src.fileno()
                     self._io_wrapped = False
                 except io.UnsupportedOperation:
                     self._io_wrapped = True
@@ -171,7 +171,6 @@ class Redirect(object):
             setattr(sys, self._stream, os.fdopen(self._old_fd, "w"))
             if unbuffered:
                 setattr(sys, self._stream, Unbuffered(getattr(sys, self._stream)))
-
 
     def install(self):
         if self._installed:
