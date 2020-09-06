@@ -139,6 +139,11 @@ class Redirect(object):
         self._old_fd = None
         self._old_fp = None
 
+        # whether stream was already wrapped (notebooks)
+        self._io_wrapped = (getattr(sys, src) !=
+                            getattr(sys, "__%s__" % src))
+        print("IO Wrapped: " + str(self._io_wrapped))
+
     def _redirect(self, to_fd, unbuffered=False, close=False):
         if close:
             fp = getattr(sys, self._stream)
@@ -146,6 +151,7 @@ class Redirect(object):
             # Do not close old filedescriptor as others might be using it
             fp.close()
         os.dup2(to_fd, self._old_fd)
+<<<<<<< Updated upstream
         if getattr(sys, self._stream) == getattr(sys, "__%s__" % self._stream):
             setattr(sys, self._stream, os.fdopen(self._old_fd, "w"))
             if unbuffered:
@@ -157,6 +163,12 @@ class Redirect(object):
                 setattr(sys, self._stream, StreamFork([getattr(sys, self._stream),
                                                       os.fdopen(self._old_fd, "w")],
                                                       unbuffered=unbuffered))
+=======
+        setattr(sys, self._stream, os.fdopen(self._old_fd, "w"))
+        if unbuffered:
+            setattr(sys, self._stream, Unbuffered(getattr(sys, self._stream)))
+
+>>>>>>> Stashed changes
 
     def install(self):
         if self._installed:
