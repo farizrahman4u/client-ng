@@ -162,14 +162,15 @@ class Redirect(object):
         os.dup2(to_fd, self._old_fd)
         if self._io_wrapped:
             if close:
-                setattr(sys, self._stream, self._stream.output_streams[0])
+                setattr(sys, self._stream, getattr(sys, self._stream).output_streams[0])
             else:
                 setattr(sys, self._stream, StreamFork([getattr(sys, self._stream),
                                                       os.fdopen(self._old_fd, "w")],
                                                       unbuffered=unbuffered))
-        setattr(sys, self._stream, os.fdopen(self._old_fd, "w"))
-        if unbuffered:
-            setattr(sys, self._stream, Unbuffered(getattr(sys, self._stream)))
+        else:
+            setattr(sys, self._stream, os.fdopen(self._old_fd, "w"))
+            if unbuffered:
+                setattr(sys, self._stream, Unbuffered(getattr(sys, self._stream)))
 
 
     def install(self):
