@@ -151,24 +151,10 @@ class Redirect(object):
             # Do not close old filedescriptor as others might be using it
             fp.close()
         os.dup2(to_fd, self._old_fd)
-<<<<<<< Updated upstream
-        if getattr(sys, self._stream) == getattr(sys, "__%s__" % self._stream):
-            setattr(sys, self._stream, os.fdopen(self._old_fd, "w"))
-            if unbuffered:
-                setattr(sys, self._stream, Unbuffered(getattr(sys, self._stream)))
-        else:
-            if close:
-                setattr(sys, self._stream, getattr(sys, self._stream).output_streams[0])
-            else:
-                setattr(sys, self._stream, StreamFork([getattr(sys, self._stream),
-                                                      os.fdopen(self._old_fd, "w")],
-                                                      unbuffered=unbuffered))
-=======
         setattr(sys, self._stream, os.fdopen(self._old_fd, "w"))
         if unbuffered:
             setattr(sys, self._stream, Unbuffered(getattr(sys, self._stream)))
 
->>>>>>> Stashed changes
 
     def install(self):
         if self._installed:
